@@ -1,0 +1,200 @@
+select * from corona;
+
+-- Q1. Write a code to check NULL values
+
+select * from corona
+where Province is null or
+Country_Region is null or 
+Latitude is null or 
+Longitude is null or 
+Date is null or 
+Confirmed is null or 
+Deaths is null or 
+Recovered is null;
+ 
+ -- Q2. If NULL values are present, update them with zeros for all columns. 
+ -- NO Null values
+ 
+ -- Q3. check total number of rows
+ select count(*) as total_rows 
+ from corona;
+  
+ -- Q4. Check what is start_date and end_date
+select min(date) as start_date,
+max(date) as end_date
+from corona;
+
+ -- Q5. Number of month present in dataset
+select year(date) as year,
+count(distinct(month(date))) as total_months
+from corona
+group by year(date);
+
+-- Q6. Find the monthly average for confirmed, deaths, recovered
+select year(date) as year,
+month(date) as month,
+round(avg(confirmed),2) as avg_confirmed,
+round(avg(deaths),2) as avg_deaths,
+round(avg(recovered),2) as avg_recovered
+from corona
+group by year(date), month(date)
+order by year asc, month asc;
+
+-- Q7. Find the most frequent value for confirmed, deaths, recovered each month 
+with frequent as(
+select
+year(date) as year, 
+month(date) as month,
+confirmed,
+deaths,
+recovered,
+ROW_NUMBER()OVER(PARTITION BY year(date), month(date) ORDER BY COUNT(*)DESC) AS rn
+from corona
+group by year(date), month(date),
+confirmed,
+deaths,
+recovered)
+select
+year,
+month,
+confirmed,
+deaths,
+recovered
+from frequent
+where rn =1
+order by year, month;
+
+-- Q8. Find minimum values for confirmed, deaths, recovered per year
+select year(date) as year,
+min(confirmed),
+min(deaths),
+min(recovered)
+from corona
+group by year
+order by year;
+
+-- Q9. Find maximum values of confirmed, deaths, recovered per year
+select year(date) as year,
+max(confirmed),
+max(deaths),
+max(recovered)
+from corona
+group by year
+order by year;
+
+-- Q10. The total number of case of confirmed, deaths, recovered each month
+select YEAR(date) as year,
+month(date) as month, 
+sum(confirmed) as total_confirmed,
+sum(deaths) as total_deaths,
+sum(recovered) as total_recovered
+from corona
+group by year,month
+order by year,month;
+
+-- Q11. Check how corona virus spread out with respect to confirmed case
+-- (Eg.: total confirmed cases, their average, variance & STDEV )
+select YEAR(date) as year,
+month(date) as month, 
+sum(confirmed) as total_confirmed,
+round(avg(confirmed),2) as avg_confirmed,
+round(variance(confirmed),2) as var_confirmed,
+round(stddev(confirmed),2) as std_confirmed
+from corona
+group by year,month
+order by year,month;
+
+-- Q12. Check how coronavirus spread out with respect to death cases per month
+-- (Eg.: total confirmed cases, their average, variance & STDEV )
+select YEAR(date) as year,
+month(date) as month, 
+sum(deaths) as total_deaths,
+round(avg(deaths),2) as avg_deaths,
+round(variance(deaths),2) as var_deaths,
+round(stddev(deaths),2) as std_deaths
+from corona
+group by year,month
+order by year,month;
+
+-- Q13. Check how corona virus spread out with respect to recovered case
+-- (Eg.: total confirmed cases, their average, variance & STDEV)
+select YEAR(date) as year,
+month(date) as month, 
+sum(recovered) as total_recovered,
+round(avg(recovered),2) as avg_recovered,
+round(variance(recovered),2) as var_recovered,
+round(stddev(recovered),2) as std_recovered
+from corona
+group by year,month
+order by year,month;
+
+-- Q14. Find Country having highest number of the Confirmed case
+select country_region,
+sum(confirmed) as total_confirmed
+from corona
+group by Country_Region
+order by total_confirmed desc
+limit 1;
+
+
+-- Q15. Find Country having lowest number of the death case
+select country_region,
+sum(deaths) as total_deaths
+from corona
+group by Country_Region
+order by total_deaths asc limit 5;
+
+-- Q16. Find top 5 countries having highest recovered case
+select country_region,
+sum(recovered) as total_recovered
+from corona
+group by Country_Region
+order by total_recovered desc
+limit 5;
+
+-- Additional Required analysis
+Q17. total confirmed cases?
+select sum(confirmed) as total_confirmed
+from corona;
+-- Q18. Total deaths
+select sum(deaths) as total_deaths
+from corona;
+-- Q19. Total recovery
+select sum(recovered) as total_recovered
+from corona;
+-- Q20. Rate death
+select (3647894/169065144)* 100 as per_deaths;
+-- Q21. Rate recovery
+select (113089548/169065144)*100 as per_recovery;
+
+-- Q22. TOP case count country
+select country_region,
+sum(Confirmed) as total_confirmed
+from corona
+group by Country_Region
+order by total_confirmed desc
+limit 5;
+
+-- Q23.Top high death country
+select country_region,
+sum(deaths) as total_deaths
+from corona
+group by Country_Region
+order by total_deaths desc
+limit 5;
+-- Q24. High death country 
+select country_region,
+sum(deaths) as total_deaths
+from corona
+group by Country_Region
+order by total_deaths desc
+limit 5;
+
+
+-- Q25.Lowest case number
+select country_region,
+sum(confirmed) as total_confirmed
+from corona
+group by Country_Region
+order by total_confirmed asc
+limit 5;
